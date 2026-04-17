@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IroSteel Metal Roofing Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #e94560;
+        }
+        
+        header p {
+            color: #a0a0a0;
+            font-size: 1.1rem;
+        }
+        
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .card h2 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #e94560;
+            border-bottom: 2px solid #e94560;
+            padding-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 1rem;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+        
+        .input-group select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .checkbox-group label {
+            cursor: pointer;
+            color: #a0a0a0;
+        }
+        
+        .trim-item {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .trim-item h3 {
+            font-size: 1rem;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        .trim-item .price {
+            color: #e94560;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .results-card {
+            background: linear-gradient(135deg, rgba(233,69,96,0.2) 0%, rgba(22,33,62,0.8) 100%);
+            border: 2px solid #e94560;
+        }
+        
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .result-row:last-child {
+            border-bottom: none;
+        }
+        
+        .result-row.total {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e94560;
+            padding: 20px 0;
+            border-top: 2px solid #e94560;
+            margin-top: 10px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: #e94560;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+        
+        .btn:hover {
+            background: #ff6b6b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(233,69,96,0.4);
+        }
+        
+        .info-box {
+            background: rgba(233,69,96,0.1);
+            border-left: 4px solid #e94560;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 20px;
+        }
+        
+        .info-box h3 {
+            color: #e94560;
+            margin-bottom: 10px;
+        }
+        
+        .info-box ul {
+            margin-left: 20px;
+            color: #a0a0a0;
+        }
+        
+        .info-box li {
+            margin-bottom: 5px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏠 IroSteel Metal Roofing Calculator</h1>
+            <p>Based on quote from Jon Peters - IroSteel (April 16, 2026)</p>
+        </header>
+        
+        <div class="info-box">
+            <h3>📋 Quote Details</h3>
+            <ul>
+                <li><strong>Supplier:</strong> IroSteel (Manufactured in-house, North American steel)</li>
+                <li><strong>Panel Type:</strong> Snap-Lock 150, 26-gauge</li>
+                <li><strong>Finish Options:</strong> SMP 40-year smooth or matte textured</li>
+                <li><strong>Delivery:</strong> On-site rolling, trims brought when they come (10' lengths)</li>
+                <li><strong>Contact:</strong> jp.irosteel@gmail.com | Irosteel.com</li>
+            </ul>
+        </div>
+        
+        <div class="calculator-grid">
+            <div class="card">
+                <h2>📐 Roof Measurements</h2>
+                
+                <div class="input-group">
+                    <label>Roof Length (feet)</label>
+                    <input type="number" id="roofLength" placeholder="e.g., 40" min="0" step="0.1">
+                </div>
+                
+                <div class="input-group">
+                    <label>Roof Width (feet)</label>
+                    <input type="number" id="roofWidth" placeholder="e.g., 30" min="0" step="0.1">
+                </div>
+                
+                <div class="input-group">
+                    <label>Roof Pitch / Slope</label>
+                    <select id="roofPitch">
+                        <option value="1.0">Flat / Low Slope (0-3/12)</option>
+                        <option value="1.1">Low Slope (4/12)</option>
+                        <option value="1.2" selected>Medium Slope (6/12)</option>
+                        <option value="1.3">Steep Slope (8/12)</option>
+                        <option value="1.4">Very Steep (10/12+)</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>Waste Factor (%)</label>
+                    <select id="wasteFactor">
+                        <option value="1.05">5% (Simple roof)</option>
+                        <option value="1.10" selected>10% (Standard)</option>
+                        <option value="1.15">15% (Complex roof)</option>
+                        <option value="1.20">20% (Very complex)</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>Panel Finish</label>
+                    <select id="panelFinish">
+                        <option value="2.68">SMP 40-year Smooth - $2.68/sq ft</option>
+                        <option value="2.85">SMP 40-year Matte Textured - $2.85/sq ft</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>✂️ Trim Pieces</h2>
+                <p style="color: #a0a0a0; margin-bottom: 15px; font-size: 0.9rem;">All trims come in 10' lengths</p>
+                
+                <div class="trim-item">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="gableTrim" checked>
+                        <label for="gableTrim"><strong>Gable Trim / Capping</strong></label>
+                    </div>
+                    <div class="input-group" style="margin-top: 10px;">
+                        <label>Linear Feet Needed</label>
+                        <input type="number" id="gableTrimLength" placeholder="e.g., 80" min="0" step="1">
+                    </div>
+                    <p class="price">$3.50 / linear foot (estimated)</p>
+                </div>
+                
+                <div class="trim-item">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="dripEdge" checked>
+                        <label for="dripEdge"><strong>Drip Edge</strong></label>
+                    </div>
+                    <div class="input-group" style="margin-top: 10px;">
+                        <label>Linear Feet Needed</label>
+                        <input type="number" id="dripEdgeLength" placeholder="e.g., 140" min="0" step="1">
+                    </div>
+                    <p class="price">$2.75 / linear foot (estimated)</p>
+                </div>
+                
+                <div class="trim-item">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="ridgeCap" checked>
+                        <label for="ridgeCap"><strong>Ridge Cap</strong></label>
+                    </div>
+                    <div class="input-group" style="margin-top: 10px;">
+                        <label>Linear Feet Needed</label>
+                        <input type="number" id="ridgeCapLength" placeholder="e.g., 40" min="0" step="1">
+                    </div>
+                    <p class="price">$4.25 / linear foot (estimated)</p>
+                </div>
+                
+                <div class="trim-item">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="eaveTrim">
+                        <label for="eaveTrim"><strong>Eave Trim</strong></label>
+                    </div>
+                    <div class="input-group" style="margin-top: 10px;">
+                        <label>Linear Feet Needed</label>
+                        <input type="number" id="eaveTrimLength" placeholder="e.g., 40" min="0" step="1">
+                    </div>
+                    <p class="price">$3.00 / linear foot (estimated)</p>
+                </div>
+                
+                <div class="trim-item">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="valleyTrim">
+                        <label for="valleyTrim"><strong>Valley Trim</strong></label>
+                    </div>
+                    <div class="input-group" style="margin-top: 10px;">
+                        <label>Linear Feet Needed</label>
+                        <input type="number" id="valleyTrimLength" placeholder="e.g., 0" min="0" step="1">
+                    </div>
+                    <p class="price">$4.50 / linear foot (estimated)</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>🔩 Additional Materials</h2>
+                
+                <div class="trim-item">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="closureStrips">
+                        <label for="closureStrips"><strong>Closure Strips</strong></label>
+                    </div>
+                    <div class="input-group" style="margin-top: 10px;">
+                        <label>Linear Feet Needed</label>
+                        <input type="number" id="closureStripsLength" placeholder="e.g., 0" min="0" step="1">
+                    </div>
+                    <p class="price">$1.50 / linear foot (estimated)</p>
+                </div>
+                
+                <div class="trim-item">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="screws">
+                        <label for="screws"><strong>Roofing Screws</strong></label>
+                    </div>
+                    <div class="input-group" style="margin-top: 10px;">
+                        <label>Quantity (boxes of 100)</label>
+                        <input type="number" id="screwsBoxes" placeholder="e.g., 5" min="0" step="1">
+                    </div>
+                    <p class="price">$25.00 / box (estimated)</p>
+                </div>
+                
+                <div class="trim-item">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="underlayment">
+                        <label for="underlayment"><strong>Synthetic Underlayment</strong></label>
+                    </div>
+                    <div class="input-group" style="margin-top: 10px;">
+                        <label>Squares (100 sq ft each)</label>
+                        <input type="number" id="underlaymentSquares" placeholder="e.g., 0" min="0" step="1">
+                    </div>
+                    <p class="price">$45.00 / square (estimated)</p>
+                </div>
+                
+                <div class="trim-item">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="iceWaterShield">
+                        <label for="iceWaterShield"><strong>Ice & Water Shield</strong></label>
+                    </div>
+                    <div class="input-group" style="margin-top: 10px;">
+                        <label>Squares (100 sq ft each)</label>
+                        <input type="number" id="iceWaterShieldSquares" placeholder="e.g., 0" min="0" step="1">
+                    </div>
+                    <p class="price">$65.00 / square (estimated)</p>
+                </div>
+            </div>
+            
+            <div class="card results-card">
+                <h2>💰 Cost Breakdown</h2>
+                
+                <div class="result-row">
+                    <span>Roof Area (adjusted for pitch):</span>
+                    <span id="totalArea">0 sq ft</span>
+                </div>
+                
+                <div class="result-row">
+                    <span>Panels (with waste factor):</span>
+                    <span id="panelArea">0 sq ft</span>
+                </div>
+                
+                <div class="result-row">
+                    <span>Panel Cost:</span>
+                    <span id="panelCost">$0.00</span>
+                </div>
+                
+                <div class="result-row">
+                    <span>Gable Trim:</span>
+                    <span id="gableTrimCost">$0.00</span>
+                </div>
+                
+                <div class="result-row">
+                    <span>Drip Edge:</span>
+                    <span id="dripEdgeCost">$0.00</span>
+                </div>
+                
+                <div class="result-row">
+                    <span>Ridge Cap:</span>
+                    <span id="ridgeCapCost">$0.00</span>
+                </div>
+                
+                <div class="result-row">
+                    <span>Eave Trim:</span>
+                    <span id="eaveTrimCost">$0.00</span>
+                </div>
+                
+                <div class="result-row">
+                    <span>Valley Trim:</span>
+                    <span id="valleyTrimCost">$0.00</span>
+                </div>
+                
+                <div class="result-row">
+                    <span>Closure Strips:</span>
+                    <span id="closureStripsCost">$0.00</span>
+                </div>
+                
+                <div class="result-row">
+                    <span>Roofing Screws:</span>
+                    <span id="screwsCost">$0.00</span>
+                </div>
+                
+                <div class="result-row">
+                    <span>Underlayment:</span>
+                    <span id="underlaymentCost">$0.00</span>
+                </div>
+                
+                <div class="result-row">
+                    <span>Ice & Water Shield:</span>
+                    <span id="iceWaterShieldCost">$0.00</span>
+                </div>
+                
+                <div class="result-row total">
+                    <span>Estimated Total:</span>
+                    <span id="grandTotal">$0.00</span>
+                </div>
+                
+                <div class="result-row" style="color: #a0a0a0; font-size: 0.9rem;">
+                    <span>Price per sq ft (panels only):</span>
+                    <span id="pricePerSqFt">$0.00</span>
+                </div>
+                
+                <button class="btn" onclick="calculate()">🔄 Calculate</button>
+                <button class="btn" onclick="resetForm()" style="background: rgba(255,255,255,0.1); margin-top: 10px;">🗑️ Reset</button>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h3>ℹ️ Notes</h3>
+            <ul>
+                <li>Panel prices are from IroSteel quote (April 16, 2026)</li>
+                <li>Trim prices are estimates - confirm with IroSteel trim catalog</li>
+                <li>Delivery includes on-site panel rolling</li>
+                <li>All trims come in 10' lengths</li>
+                <li>Final quote may vary based on actual measurements and current pricing</li>
+                <li>Contact Jon Peters at jp.irosteel@gmail.com for official quote</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Trim prices per linear foot (estimated)
+        const TRIM_PRICES = {
+            gableTrim: 3.50,
+            dripEdge: 2.75,
+            ridgeCap: 4.25,
+            eaveTrim: 3.00,
+            valleyTrim: 4.50,
+            closureStrips: 1.50
+        };
+        
+        // Additional material prices
+        const MATERIAL_PRICES = {
+            screws: 25.00,      // per box of 100
+            underlayment: 45.00, // per square (100 sq ft)
+            iceWaterShield: 65.00 // per square (100 sq ft)
+        };
+        
+        function calculate() {
+            // Get roof measurements
+            const roofLength = parseFloat(document.getElementById('roofLength').value) || 0;
+            const roofWidth = parseFloat(document.getElementById('roofWidth').value) || 0;
+            const roofPitch = parseFloat(document.getElementById('roofPitch').value);
+            const wasteFactor = parseFloat(document.getElementById('wasteFactor').value);
+            const panelPrice = parseFloat(document.getElementById('panelFinish').value);
+            
+            // Calculate areas
+            const baseArea = roofLength * roofWidth;
+            const adjustedArea = baseArea * roofPitch;
+            const panelArea = adjustedArea * wasteFactor;
+            
+            // Calculate panel cost
+            const panelCost = panelArea * panelPrice;
+            
+            // Calculate trim costs
+            const gableTrimLength = document.getElementById('gableTrim').checked ? 
+                (parseFloat(document.getElementById('gableTrimLength').value) || 0) : 0;
+            const gableTrimCost = gableTrimLength * TRIM_PRICES.gableTrim;
+            
+            const dripEdgeLength = document.getElementById('dripEdge').checked ? 
+                (parseFloat(document.getElementById('dripEdgeLength').value) || 0) : 0;
+            const dripEdgeCost = dripEdgeLength * TRIM_PRICES.dripEdge;
+            
+            const ridgeCapLength = document.getElementById('ridgeCap').checked ? 
+                (parseFloat(document.getElementById('ridgeCapLength').value) || 0) : 0;
+            const ridgeCapCost = ridgeCapLength * TRIM_PRICES.ridgeCap;
+            
+            const eaveTrimLength = document.getElementById('eaveTrim').checked ? 
+                (parseFloat(document.getElementById('eaveTrimLength').value) || 0) : 0;
+            const eaveTrimCost = eaveTrimLength * TRIM_PRICES.eaveTrim;
+            
+            const valleyTrimLength = document.getElementById('valleyTrim').checked ? 
+                (parseFloat(document.getElementById('valleyTrimLength').value) || 0) : 0;
+            const valleyTrimCost = valleyTrimLength * TRIM_PRICES.valleyTrim;
+            
+            const closureStripsLength = document.getElementById('closureStrips').checked ? 
+                (parseFloat(document.getElementById('closureStripsLength').value) || 0) : 0;
+            const closureStripsCost = closureStripsLength * TRIM_PRICES.closureStrips;
+            
+            // Calculate additional material costs
+            const screwsBoxes = document.getElementById('screws').checked ? 
+                (parseFloat(document.getElementById('screwsBoxes').value) || 0) : 0;
+            const screwsCost = screwsBoxes * MATERIAL_PRICES.screws;
+            
+            const underlaymentSquares = document.getElementById('underlayment').checked ? 
+                (parseFloat(document.getElementById('underlaymentSquares').value) || 0) : 0;
+            const underlaymentCost = underlaymentSquares * MATERIAL_PRICES.underlayment;
+            
+            const iceWaterShieldSquares = document.getElementById('iceWaterShield').checked ? 
+                (parseFloat(document.getElementById('iceWaterShieldSquares').value) || 0) : 0;
+            const iceWaterShieldCost = iceWaterShieldSquares * MATERIAL_PRICES.iceWaterShield;
+            
+            // Calculate grand total
+            const grandTotal = panelCost + gableTrimCost + dripEdgeCost + ridgeCapCost + 
+                              eaveTrimCost + valleyTrimCost + closureStripsCost + 
+                              screwsCost + underlaymentCost + iceWaterShieldCost;
+            
+            // Update display
+            document.getElementById('totalArea').textContent = adjustedArea.toFixed(1) + ' sq ft';
+            document.getElementById('panelArea').textContent = panelArea.toFixed(1) + ' sq ft';
+            document.getElementById('panelCost').textContent = formatCurrency(panelCost);
+            document.getElementById('gableTrimCost').textContent = formatCurrency(gableTrimCost);
+            document.getElementById('dripEdgeCost').textContent = formatCurrency(dripEdgeCost);
+            document.getElementById('ridgeCapCost').textContent = formatCurrency(ridgeCapCost);
+            document.getElementById('eaveTrimCost').textContent = formatCurrency(eaveTrimCost);
+            document.getElementById('valleyTrimCost').textContent = formatCurrency(valleyTrimCost);
+            document.getElementById('closureStripsCost').textContent = formatCurrency(closureStripsCost);
+            document.getElementById('screwsCost').textContent = formatCurrency(screwsCost);
+            document.getElementById('underlaymentCost').textContent = formatCurrency(underlaymentCost);
+            document.getElementById('iceWaterShieldCost').textContent = formatCurrency(iceWaterShieldCost);
+            document.getElementById('grandTotal').textContent = formatCurrency(grandTotal);
+            
+            const actualPricePerSqFt = panelArea > 0 ? panelPrice : 0;
+            document.getElementById('pricePerSqFt').textContent = formatCurrency(actualPricePerSqFt) + ' / sq ft';
+        }
+        
+        function formatCurrency(amount) {
+            return '$' + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+        
+        function resetForm() {
+            document.querySelectorAll('input[type="number"]').forEach(input => input.value = '');
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                if (checkbox.id !== 'gableTrim' && checkbox.id !== 'dripEdge' && checkbox.id !== 'ridgeCap') {
+                    checkbox.checked = false;
+                }
+            });
+            document.getElementById('roofPitch').value = '1.2';
+            document.getElementById('wasteFactor').value = '1.10';
+            document.getElementById('panelFinish').value = '2.68';
+            calculate();
+        }
+        
+        // Auto-calculate on input change
+        document.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('change', calculate);
+            element.addEventListener('input', calculate);
+        });
+        
+        // Initial calculation
+        calculate();
+    </script>
+</body>
+</html>
