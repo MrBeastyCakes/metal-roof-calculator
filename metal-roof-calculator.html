@@ -931,6 +931,111 @@
         .error-state.visible {
             display: block;
         }
+
+        /* ============================================
+           ROOF DRAWING UI
+           ============================================ */
+        .shape-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .shape-btn {
+            padding: 10px 16px;
+            background: var(--gray-100);
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            color: var(--gray-700);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .shape-btn:hover {
+            background: var(--gray-200);
+            border-color: var(--navy-600);
+        }
+
+        .shape-btn.selected {
+            background: var(--gold-500);
+            border-color: var(--gold-500);
+            color: var(--navy-900);
+        }
+
+        .drawing-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .draw-control-btn {
+            padding: 6px 10px;
+            background: var(--white);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-sm);
+            color: var(--gray-700);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .draw-control-btn:hover {
+            background: var(--gray-100);
+            border-color: var(--navy-600);
+        }
+
+        .dimension-panel {
+            background: var(--gray-50);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--gray-200);
+        }
+
+        .dimension-input {
+            margin-bottom: 12px;
+        }
+
+        .dimension-input label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--gray-700);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .dimension-input input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+        }
+
+        .dimension-input input:focus {
+            outline: none;
+            border-color: var(--navy-600);
+            box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
+        }
+
+        .calc-result {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+        }
+
+        .calc-result strong {
+            color: var(--navy-800);
+            font-weight: 600;
+        }
+
+        @media (max-width: 1024px) {
+            .card[style*="grid-template-columns: 1fr 300px"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -992,6 +1097,84 @@
         <div class="error-state" id="errorState">
             <strong>⚠️ Please fix the following errors:</strong>
             <ul id="errorList" style="margin-left: 20px; margin-top: 10px;"></ul>
+        </div>
+
+        <!-- Roof Drawing Section -->
+        <div class="card no-print" style="margin-bottom: 25px;">
+            <h2><span class="icon">✏️</span> Interactive Roof Drawing</h2>
+            
+            <div style="margin-bottom: 15px;">
+                <p style="color: var(--gray-600); font-size: 0.9rem; margin-bottom: 10px;">Select a shape template or draw custom:</p>
+                <div class="shape-selector" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="shape-btn selected" data-shape="rectangle" onclick="RoofUI.selectShape('rectangle')">📐 Rectangle</button>
+                    <button class="shape-btn" data-shape="lshape" onclick="RoofUI.selectShape('lshape')">⌛ L-Shape</button>
+                    <button class="shape-btn" data-shape="tshape" onclick="RoofUI.selectShape('tshape')">⊥ T-Shape</button>
+                    <button class="shape-btn" data-shape="ushape" onclick="RoofUI.selectShape('ushape')">⊓ U-Shape</button>
+                    <button class="shape-btn" data-shape="custom" onclick="RoofUI.selectShape('custom')">✏️ Custom</button>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 300px; gap: 20px;">
+                <div class="drawing-container" id="roofDrawingContainer" style="background: #fff; border: 2px solid var(--gray-300); border-radius: var(--radius-md); min-height: 400px; position: relative;">
+                    <div style="position: absolute; top: 10px; right: 10px; z-index: 10; display: flex; gap: 5px;">
+                        <button class="draw-control-btn" onclick="RoofDrawer.pan(-20, 0)" title="Pan Left">⬅️</button>
+                        <button class="draw-control-btn" onclick="RoofDrawer.pan(20, 0)" title="Pan Right">➡️</button>
+                        <button class="draw-control-btn" onclick="RoofDrawer.pan(0, -20)" title="Pan Up">⬆️</button>
+                        <button class="draw-control-btn" onclick="RoofDrawer.pan(0, 20)" title="Pan Down">⬇️</button>
+                    </div>
+                    <div style="position: absolute; bottom: 10px; right: 10px; z-index: 10; display: flex; gap: 5px;">
+                        <button class="draw-control-btn" onclick="RoofDrawer.zoom(-0.25)" title="Zoom Out">🔍-</button>
+                        <button class="draw-control-btn" onclick="RoofDrawer.resetView()" title="Reset View">⟲</button>
+                        <button class="draw-control-btn" onclick="RoofDrawer.zoom(0.25)" title="Zoom In">🔍+</button>
+                    </div>
+                </div>
+                
+                <div class="dimension-panel" id="dimensionPanel">
+                    <h3 style="font-size: 1rem; color: var(--navy-800); margin-bottom: 15px;">Dimensions</h3>
+                    <div id="dimensionInputs"></div>
+                    
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--gray-300);">
+                        <div class="input-group" style="margin-bottom: 10px;">
+                            <label style="font-size: 0.85rem;">Unit</label>
+                            <select id="dimensionUnit" onchange="RoofUI.setUnit(this.value)" style="width: 100%; padding: 8px; border: 1px solid var(--gray-300); border-radius: var(--radius-sm);">
+                                <option value="decimal">Decimal Feet</option>
+                                <option value="feet_inches">Feet & Inches</option>
+                            </select>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px;">
+                            <button class="draw-control-btn" onclick="RoofDrawer.toggleGrid()" title="Toggle Grid"># Grid</button>
+                            <button class="draw-control-btn" onclick="RoofDrawer.toggleSnap()" title="Toggle Snap">🧲 Snap</button>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--gray-300);">
+                        <h4 style="font-size: 0.9rem; color: var(--navy-800); margin-bottom: 10px;">Calculated</h4>
+                        <div class="calc-result"><span>Total Area:</span><strong id="drawArea">0</strong> sq ft</div>
+                        <div class="calc-result"><span>Perimeter:</span><strong id="drawPerimeter">0</strong> ft</div>
+                        <div class="calc-result"><span>Ridge Length:</span><strong id="drawRidge">0</strong> ft</div>
+                        <div class="calc-result"><span>Gable Trim:</span><strong id="drawGable">0</strong> ft</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
+                <button class="btn" style="flex: 1; min-width: 150px;" onclick="RoofUI.useDrawing()">
+                    ✓ Use This Drawing
+                </button>
+                <button class="btn secondary" style="flex: 1; min-width: 120px;" onclick="RoofDrawer.saveDrawing()">
+                    💾 Save
+                </button>
+                <button class="btn secondary" style="flex: 1; min-width: 120px;" onclick="RoofUI.loadDrawing()">
+                    📂 Load
+                </button>
+                <button class="btn secondary" style="flex: 1; min-width: 120px;" onclick="RoofDrawer.exportPNG()">
+                    📷 Export PNG
+                </button>
+                <button class="btn secondary" style="flex: 1; min-width: 120px;" onclick="RoofDrawer.clear()">
+                    🗑️ Clear
+                </button>
+            </div>
         </div>
 
         <!-- Main Calculator Grid -->
@@ -1510,6 +1693,7 @@
         </div>
     </div>
 
+    <script src="roof-drawing.js"></script>
     <script>
         /**
          * IroSteel Metal Roofing Calculator
@@ -2359,6 +2543,156 @@
                 init();
             }
         })();
+
+        // ============================================
+        // ROOF DRAWING UI CONTROLLER
+        // ============================================
+        const RoofUI = (function() {
+            'use strict';
+
+            let currentUnit = 'decimal';
+            let roofDrawer = null;
+
+            function init() {
+                // Initialize roof drawer
+                roofDrawer = window.RoofDrawer;
+                if (roofDrawer && roofDrawer.init) {
+                    const success = roofDrawer.init('roofDrawingContainer');
+                    if (success) {
+                        renderDimensionInputs();
+                        setupEventListeners();
+                    }
+                }
+            }
+
+            function setupEventListeners() {
+                // Listen for roof drawing updates
+                window.addEventListener('roofDrawingUpdate', function(e) {
+                    const data = e.detail;
+                    document.getElementById('drawArea').textContent = data.area.toFixed(1);
+                    document.getElementById('drawPerimeter').textContent = data.perimeter.toFixed(1);
+                    document.getElementById('drawRidge').textContent = data.ridgeLength.toFixed(1);
+                    document.getElementById('drawGable').textContent = data.gableTrim.toFixed(1);
+                });
+            }
+
+            function renderDimensionInputs() {
+                const container = document.getElementById('dimensionInputs');
+                if (!container || !roofDrawer) return;
+
+                const templates = roofDrawer.getShapeTemplates();
+                const currentShape = roofDrawer.shapeType || 'rectangle';
+                const template = templates[currentShape];
+
+                if (!template) {
+                    container.innerHTML = '<p style="color: var(--gray-500); font-size: 0.9rem;">Select a shape to edit dimensions</p>';
+                    return;
+                }
+
+                let html = '';
+                template.segments.forEach(seg => {
+                    const value = roofDrawer.getCalculations().dimensions[seg.key] || seg.default;
+                    html += `
+                        <div class="dimension-input">
+                            <label>${seg.name}</label>
+                            <input type="number" 
+                                   value="${value}" 
+                                   min="0" 
+                                   step="0.1" 
+                                   onchange="RoofUI.updateDimension('${seg.key}', this.value)"
+                                   placeholder="${seg.default}">
+                        </div>
+                    `;
+                });
+
+                if (currentShape === 'custom') {
+                    html += '<p style="color: var(--gray-600); font-size: 0.85rem; margin-top: 10px;">Click on canvas to add points. Double-click to close polygon.</p>';
+                }
+
+                container.innerHTML = html;
+            }
+
+            return {
+                init,
+
+                selectShape(shape) {
+                    if (roofDrawer) {
+                        roofDrawer.setShapeType(shape);
+                        
+                        // Update button states
+                        document.querySelectorAll('.shape-btn').forEach(btn => {
+                            btn.classList.toggle('selected', btn.dataset.shape === shape);
+                        });
+                        
+                        renderDimensionInputs();
+                    }
+                },
+
+                updateDimension(key, value) {
+                    if (roofDrawer) {
+                        roofDrawer.setDimension(key, value);
+                        renderDimensionInputs();
+                    }
+                },
+
+                setUnit(unit) {
+                    currentUnit = unit;
+                    // Convert existing dimensions if needed
+                },
+
+                useDrawing() {
+                    if (!roofDrawer) return;
+
+                    const calcs = roofDrawer.getCalculations();
+                    
+                    // Update main calculator fields
+                    const lengthInput = document.getElementById('roofLength');
+                    const widthInput = document.getElementById('roofWidth');
+                    
+                    if (lengthInput && widthInput) {
+                        // For rectangle, use length and width directly
+                        if (calcs.dimensions.length && calcs.dimensions.width) {
+                            lengthInput.value = calcs.dimensions.length.toFixed(1);
+                            widthInput.value = calcs.dimensions.width.toFixed(1);
+                        } else {
+                            // For complex shapes, derive approximate dimensions
+                            const equivalentWidth = calcs.perimeter / 4;
+                            const equivalentLength = calcs.area / equivalentWidth;
+                            lengthInput.value = equivalentLength.toFixed(1);
+                            widthInput.value = equivalentWidth.toFixed(1);
+                        }
+                        
+                        // Trigger calculator update
+                        lengthInput.dispatchEvent(new Event('input'));
+                        widthInput.dispatchEvent(new Event('input'));
+                        
+                        // Visual feedback
+                        const btn = event.target;
+                        const originalText = btn.textContent;
+                        btn.textContent = '✓ Applied!';
+                        btn.style.background = 'var(--success)';
+                        setTimeout(() => {
+                            btn.textContent = originalText;
+                            btn.style.background = '';
+                        }, 1500);
+                    }
+                },
+
+                loadDrawing() {
+                    if (roofDrawer) {
+                        roofDrawer.loadSavedDrawing();
+                        renderDimensionInputs();
+                    }
+                }
+            };
+        })();
+
+        // Initialize roof drawing UI after DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => RoofUI.init());
+        } else {
+            RoofUI.init();
+        }
     </script>
 </body>
 </html>
